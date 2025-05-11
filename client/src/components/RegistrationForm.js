@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 
+const isValidFullName = (name) => {
+  const parts = name.trim().split(/\s+/);
+  return parts.length >= 2 && parts.every((part) => part.length >= 2);
+};
+
 const RegistrationForm = ({ onRegister }) => {
   const [form, setForm] = useState({
     fullName: "",
@@ -18,57 +23,87 @@ const RegistrationForm = ({ onRegister }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("🚀 Form submit triggered"); // 👈 Place it here
-    console.log("Submitting form:", form);
+
+    if (
+      !isValidFullName(form.fullName) ||
+      !form.email.includes("@") ||
+      form.age <= 0
+    ) {
+      alert(
+        "Please enter a valid full name (at least two words), a valid email, and age > 0."
+      );
+      return;
+    }
 
     try {
-      console.log("Sending POST request...");
-      const res = await axios.post("'/api/participants', form", form);
-      console.log("✅ Response:", res.data);
-      onRegister(); // refresh list
+      await axios.post("/api/participants", form);
+      onRegister();
       setForm({ fullName: "", email: "", age: "" });
     } catch (err) {
-      console.error(
-        "❌ Error registering participant:",
-        err.response?.data || err.message
-      );
-      alert("❌ Error occurred! Check the console.");
+      console.error("Error registering participant:", err);
+      alert(`Error: ${err.response?.data?.message || err.message}`);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Register New Participant</h2>
-      <input
-        type="text"
-        name="fullName"
-        placeholder="Full Name"
-        value={form.fullName}
-        onChange={handleChange}
-        required
-      />
-      <br />
-      <input
-        type="email"
-        name="email"
-        placeholder="Email"
-        value={form.email}
-        onChange={handleChange}
-        required
-      />
-      <br />
-      <input
-        type="number"
-        name="age"
-        placeholder="Age"
-        value={form.age}
-        onChange={handleChange}
-        required
-      />
-      <br />
-      <button type="submit">Register</button>
-    </form>
+    <div
+      className="card shadow-lg mx-auto mb-5"
+      style={{ maxWidth: "500px", borderRadius: "16px" }}
+    >
+      <div className="card-body">
+        <h4 className="text-center mb-4 fw-bold">Register Participant</h4>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label htmlFor="fullName" className="form-label">
+              Full Name
+            </label>
+            <input
+              type="text"
+              id="fullName"
+              name="fullName"
+              className="form-control"
+              value={form.fullName}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              className="form-control"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="age" className="form-label">
+              Age
+            </label>
+            <input
+              type="number"
+              id="age"
+              name="age"
+              className="form-control"
+              value={form.age}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <button type="submit" className="btn btn-primary w-100 rounded-pill">
+            Register
+          </button>
+        </form>
+      </div>
+    </div>
   );
 };
-
 export default RegistrationForm;

@@ -18,6 +18,12 @@ router.post("/", async (req, res) => {
 
   const { fullName, email, age } = req.body;
 
+  if (!fullName || !email || !age || age < 0) {
+    return res
+      .status(400)
+      .json({ message: "All fields are required and age must be valid." });
+  }
+
   const newParticipant = new Participant({ fullName, email, age });
 
   try {
@@ -31,6 +37,12 @@ router.post("/", async (req, res) => {
 // 🔹 PUT (update) participant
 router.put("/:id", async (req, res) => {
   const { fullName, email, age } = req.body;
+
+  if (!fullName || !email || !age || age < 0) {
+    return res
+      .status(400)
+      .json({ message: "All fields are required and age must be valid." });
+  }
 
   try {
     const updated = await Participant.findByIdAndUpdate(
